@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use std::net::TcpListener;
-
+use std::io::Write;
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     println!("Logs from your program will appear here!");
@@ -11,9 +11,9 @@ fn main() {
     //
     for stream in listener.incoming() {
          match stream {
-             Ok(stream) => {
+             Ok(mut stream) => {
                  println!("accepted new connection");
-                 stream.write_all("HTTP/1.1 200 OK\r\n\r\n".as_bytes()).unwrap()
+                 stream.write("HTTP/1.1 200 OK\r\n\r\n".as_bytes()).unwrap();
              }
              Err(e) => {
                  println!("error: {}", e);
