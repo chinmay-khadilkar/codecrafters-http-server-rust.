@@ -45,9 +45,16 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
         dir.push_str(&files);
         let body_content = http_request[http_request.len() - 1].clone();
         println!("{:?},  {:?}", dir, body_content);
-        let mut file = fs::File::create(dir).unwrap();
-        file.write(body_content.as_bytes()).unwrap();
-        return StatusCode::Created;
+        let file = fs::File::create(dir);
+        match file {
+            Ok(mut fle) => {
+                fle.write(body_content.as_bytes()).unwrap();
+                return StatusCode::Created
+            },
+            Err(..) => {
+                return StatusCode::NotFound
+            }
+        }
     }
 
     if request_line[1] == "/" {
