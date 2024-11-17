@@ -52,6 +52,7 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
                 return StatusCode::Created
             },
             Err(..) => {
+                println!("here is the problem");
                 return StatusCode::NotFound
             }
         }
