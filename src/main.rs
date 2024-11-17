@@ -51,8 +51,8 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
                 fle.write(body_content.as_bytes()).unwrap();
                 return StatusCode::Created
             },
-            Err(e) => {
-                println!("here is the problem {:?}", e);
+            Err(..) => {
+                println!("here is the problem");
                 return StatusCode::NotFound
             }
         }
