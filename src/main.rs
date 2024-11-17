@@ -1,11 +1,13 @@
 #[allow(unused_imports)]
 use std::net::{ TcpStream, TcpListener};
 use std::io::{ Write, BufReader, BufRead };
+use std::{env, fs};
 
 enum StatusCode {
     Success,
     NotFound,
-    SuccessBody{content_len: u8, content: String}
+    SuccessBody{content_len: u8, content: String},
+    OctateSuccess{content_len: usize, content: String}
 }
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -20,19 +22,6 @@ fn main() {
              Ok(stream) => {
                  println!("accepted new connection");
                  std::thread::spawn(|| process_stream(stream));
-                 /* let status_code = handle_connection(&mut stream);
-                 match status_code {
-                    StatusCode::Success => {
-                        stream.write("HTTP/1.1 200 OK\r\n\r\n".as_bytes()).unwrap();
-                    },
-                    StatusCode::NotFound => {
-                        stream.write("HTTP/1.1 404 Not Found\r\n\r\n".as_bytes()).unwrap();
-                    },
-                    StatusCode::SuccessBody{content_len, content} => {
-                        let response = format!("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {}\r\n\r\n{}",content_len,  content);
-                        stream.write(response.as_bytes()).unwrap();
-                    }
-                 } */
              }
              Err(e) => {
                  println!("error: {}", e);
@@ -63,7 +52,25 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
             content_len: response_body.len() as u8,
             content: response_body as String
         }
-    }else {
+    } else if request_line[1].starts_with("/files") {
+        let content:Vec<String> = request_line[1].split("/").map(|item| item.to_string()).collect();
+        let files = content[content.len() - 1].clone();
+        let env_args: Vec<String> = env::args().collect();
+        let mut dir = env_args[2].clone();
+        dir.push_str(&files);
+        let file = fs::read(dir);
+        match file {
+            Ok(fc) => {
+                StatusCode::OctateSuccess {
+                    content_len: fc.len(),
+                    content: String::from_utf8(fc).expect("file content")
+                }
+            },
+            Err(..) => {
+                StatusCode::NotFound
+            }
+        }
+    } else {
         StatusCode::NotFound
     }
 }
@@ -78,7 +85,11 @@ fn process_stream (mut stream: TcpStream) {
             stream.write("HTTP/1.1 404 Not Found\r\n\r\n".as_bytes()).unwrap();
         },
         StatusCode::SuccessBody{content_len, content} => {
-            let response = format!("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {}\r\n\r\n{}",content_len,  content);
+            let response = format!("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {}\r\n\r\n{}",content_len, content);
+            stream.write(response.as_bytes()).unwrap();
+        },
+        StatusCode::OctateSuccess{content_len, content} => {
+            let response = format!("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {}\r\n\r\n{}",content_len, content);
             stream.write(response.as_bytes()).unwrap();
         }
     }
