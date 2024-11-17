@@ -37,7 +37,13 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
     println!("{:?}", request_line);
 
     if request_line[0].starts_with("POST") {
-        println!("{:?}", http_request);
+        let content:Vec<String> = request_line[1].split("/").map(|item| item.to_string()).collect();
+        let files = content[content.len() - 1].clone();
+        let env_args: Vec<String> = env::args().collect();
+        let mut dir = env_args[2].clone();
+        dir.push_str(&files);
+        let body_content = http_request[http_request.len() - 1].clone();
+        println!("{:?},  {:?}", dir, body_content);
     }
 
     if request_line[1] == "/" {
