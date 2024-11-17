@@ -56,8 +56,7 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
             content: response_body as String
         }
     } else if request_line[1].starts_with("/user-agent") {
-        let content:Vec<String> = request_line[1].split("/").map(|item| item.to_string()).collect();
-        println!("{:?}", http_request);
+        let content:Vec<String> = http_request[http_request.len() - 1].split(" ").map(|item| item.to_string()).collect();
         let response_body = content[content.len() - 1].clone();
         StatusCode::SuccessBody {
             content_len: response_body.len() as u8,
