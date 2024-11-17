@@ -1,6 +1,11 @@
 #[allow(unused_imports)]
-use std::net::TcpListener;
+use std::net::{ TcpStream, TcpListener};
 use std::io::Write;
+
+enum StatusCode {
+    Success,
+    NotFound
+}
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     println!("Logs from your program will appear here!");
@@ -13,11 +18,23 @@ fn main() {
          match stream {
              Ok(mut stream) => {
                  println!("accepted new connection");
-                 stream.write("HTTP/1.1 200 OK\r\n\r\n".as_bytes()).unwrap();
+                 let status_code = handle_connection();
+                 match status_code {
+                    StatusCode::Success => {
+                        stream.write("HTTP/1.1 200 OK\r\n\r\n".as_bytes()).unwrap();
+                    },
+                    StatusCode::NotFound => {
+                        stream.write("HTTP/1.1 404 Not Found\r\n\r\n".as_bytes()).unwrap();
+                    }
+                 }
              }
              Err(e) => {
                  println!("error: {}", e);
              }
          }
      }
+}
+
+fn handle_connection () -> StatusCode {
+    StatusCode::Success
 }
