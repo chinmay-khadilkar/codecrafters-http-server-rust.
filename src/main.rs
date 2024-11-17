@@ -48,6 +48,7 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
     if request_line[1] == "/" {
         StatusCode::Success
     } else if request_line[1].starts_with("/echo") {
+        println!("{:?}", request_line[1]);
         let content:Vec<String> = request_line[1].split("/").map(|item| item.to_string()).collect();
         StatusCode::SuccessBody {
             content_len: content.len() as u8,
