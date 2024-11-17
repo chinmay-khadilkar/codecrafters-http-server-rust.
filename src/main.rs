@@ -7,7 +7,8 @@ enum StatusCode {
     Success,
     NotFound,
     SuccessBody{content_len: u8, content: String},
-    OctateSuccess{content_len: usize, content: String}
+    OctateSuccess{content_len: usize, content: String},
+    Created
 }
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -44,6 +45,9 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
         dir.push_str(&files);
         let body_content = http_request[http_request.len() - 1].clone();
         println!("{:?},  {:?}", dir, body_content);
+        let mut file = fs::File::create(dir).unwrap();
+        file.write(body_content.as_bytes()).unwrap();
+        return StatusCode::Created;
     }
 
     if request_line[1] == "/" {
@@ -102,6 +106,9 @@ fn process_stream (mut stream: TcpStream) {
         StatusCode::OctateSuccess{content_len, content} => {
             let response = format!("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {}\r\n\r\n{}",content_len, content);
             stream.write(response.as_bytes()).unwrap();
+        },
+        StatusCode::Created => {
+            stream.write("HTTP/1.1 201 Created\r\n\r\n".as_bytes()).unwrap();
         }
     }
 }
