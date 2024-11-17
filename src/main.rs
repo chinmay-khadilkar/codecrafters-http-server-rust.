@@ -32,7 +32,7 @@ fn main() {
 
 fn handle_connection (stream: &mut TcpStream) -> StatusCode {
     let buffer = BufReader::new(stream);
-    let http_request: Vec<String> = buffer.lines().map(|line| line.unwrap()).take_while(|line| !line.is_empty()).collect();
+    let http_request: Vec<String> = buffer.lines().map(|line| line.unwrap()).collect();
     let request_line: Vec<String> = http_request[0].split(" ").map(|item| item.to_string()).collect();
     println!("{:?}", request_line);
 
