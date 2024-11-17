@@ -17,9 +17,10 @@ fn main() {
     //
     for stream in listener.incoming() {
          match stream {
-             Ok(mut stream) => {
+             Ok(stream) => {
                  println!("accepted new connection");
-                 let status_code = handle_connection(&mut stream);
+                 std::thread::spawn(|| process_stream(stream));
+                 /* let status_code = handle_connection(&mut stream);
                  match status_code {
                     StatusCode::Success => {
                         stream.write("HTTP/1.1 200 OK\r\n\r\n".as_bytes()).unwrap();
@@ -31,7 +32,7 @@ fn main() {
                         let response = format!("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {}\r\n\r\n{}",content_len,  content);
                         stream.write(response.as_bytes()).unwrap();
                     }
-                 }
+                 } */
              }
              Err(e) => {
                  println!("error: {}", e);
@@ -64,5 +65,21 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
         }
     }else {
         StatusCode::NotFound
+    }
+}
+
+fn process_stream (mut stream: TcpStream) {
+    let status_code = handle_connection(&mut stream);
+    match status_code {
+        StatusCode::Success => {
+            stream.write("HTTP/1.1 200 OK\r\n\r\n".as_bytes()).unwrap();
+        },
+        StatusCode::NotFound => {
+            stream.write("HTTP/1.1 404 Not Found\r\n\r\n".as_bytes()).unwrap();
+        },
+        StatusCode::SuccessBody{content_len, content} => {
+            let response = format!("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {}\r\n\r\n{}",content_len,  content);
+            stream.write(response.as_bytes()).unwrap();
+        }
     }
 }
