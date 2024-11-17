@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use std::net::{ TcpStream, TcpListener};
-use std::io::Write;
+use std::io::{ Write, BufReader, BufRead };
 
 enum StatusCode {
     Success,
@@ -18,7 +18,7 @@ fn main() {
          match stream {
              Ok(mut stream) => {
                  println!("accepted new connection");
-                 let status_code = handle_connection();
+                 let status_code = handle_connection(&mut stream);
                  match status_code {
                     StatusCode::Success => {
                         stream.write("HTTP/1.1 200 OK\r\n\r\n".as_bytes()).unwrap();
@@ -35,6 +35,14 @@ fn main() {
      }
 }
 
-fn handle_connection () -> StatusCode {
-    StatusCode::Success
+fn handle_connection (stream: &mut TcpStream) -> StatusCode {
+    let buffer = BufReader::new(stream);
+    let http_request: Vec<String> = buffer.lines().map(|line| line.unwrap()).take_while(|line| !line.is_empty()).collect();
+    let request_line: Vec<String> = http_request[0].split(" ").map(|item| item.to_string()).collect();
+
+    if request_line[1] == "/" {
+        StatusCode::Success
+    } else {
+        StatusCode::NotFound
+    }
 }
