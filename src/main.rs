@@ -35,6 +35,11 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
     let http_request: Vec<String> = buffer.lines().map(|line| line.unwrap()).take_while(|line| !line.is_empty()).collect();
     let request_line: Vec<String> = http_request[0].split(" ").map(|item| item.to_string()).collect();
     println!("{:?}", request_line);
+
+    if request_line[0].starts_with("POST") {
+        println!("{:?}", http_request);
+    }
+
     if request_line[1] == "/" {
         StatusCode::Success
     } else if request_line[1].starts_with("/echo") {
