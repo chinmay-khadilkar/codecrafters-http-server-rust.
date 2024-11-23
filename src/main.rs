@@ -3,6 +3,7 @@ use std::net::{ TcpStream, TcpListener};
 use std::io::{ Write, BufReader, BufRead };
 use std::{env, fs};
 use std::path::Path;
+use std::fs::File;
 
 enum StatusCode {
     Success,
@@ -40,30 +41,32 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
 
     if request_line[0].starts_with("POST") {
         let content:Vec<String> = request_line[1].split("/").map(|item| item.to_string()).collect();
-        let files = content[content.len() - 1].clone();
+        let file_name = content[content.len() - 1].clone();
         let env_args: Vec<String> = env::args().collect();
-        let mut dir = env_args[2].clone();
-        println!("before file name append {:?}, {:?}", Path::new(&dir).exists(), dir);
-        dir.push_str(&files);
-        let body_content = http_request[http_request.len() - 1].clone();
-        println!("{:?},  {:?}", dir, body_content);
-        println!("after file name append {:?}, {:?}", Path::new(&dir).exists(), dir);
-        if !Path::new(&dir).exists() {
-            fs::create_dir_all(Path::new(&dir).parent().unwrap());
-            let file = fs::File::create(&dir);
-            match file {
-                Ok(mut fle) => {
-                    fle.write(body_content.as_bytes()).unwrap();
-                    return StatusCode::Created
-                },
-                Err(e) => {
-                    println!("here is the problem");
-                    eprintln!("Failed to Error: {}", e);
-                    return StatusCode::NotFound
-                }
+        let dir = env_args[2].clone();
+        let file_path = Path::new(&dir).join(file_name);
+        if let Some(parent) = file_path.parent() {
+            if let Err(e) = fs::create_dir_all(parent) {
+                eprintln!("Failed to create directory: {}. Error: {}", parent.display(), e);
             }
         }
+        let mut file: Option<File> = None;
+        // Create the file
+        match File::create(&file_path) {
+            Ok(f) => file = Some(f),
+            Err(e) => {
+                eprintln!("Failed to create file");
+            }
+        };
+
+        let content = http_request[http_request.len() - 1].clone();
         
+        match file {
+            Some(mut f) => f.write_all(content.as_bytes()).unwrap(),
+            None => println!("exit from here"),
+        }
+        
+        return StatusCode::Created
         
     }
 
