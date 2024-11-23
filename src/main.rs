@@ -111,7 +111,7 @@ fn process_stream (mut stream: TcpStream) {
         },
         StatusCode::Created => {
             println!("code comes here");
-            stream.write("HTTP/1.1 201 Created\r\n\r\n".as_bytes()).unwrap();
+            stream.write_all("HTTP/1.1 201 Created\r\n\r\n".as_bytes()).unwrap();
         }
     }
 }
