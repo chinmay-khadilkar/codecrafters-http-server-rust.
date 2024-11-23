@@ -51,7 +51,7 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
         let mut f = File::create_new(&file_path).expect("to make a file");
         f.write_all(content.as_bytes()).expect("to write content to a file");
         
-        return StatusCode::Success
+        return StatusCode::Created
         
     }
 
