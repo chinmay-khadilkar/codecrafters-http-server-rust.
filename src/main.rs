@@ -50,11 +50,9 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
         let content = http_request[http_request.len() - 1].clone();
         let mut f = File::create_new(&file_path);
         f.expect("reason").write(content.as_bytes());
-        return StatusCode::Created
+        StatusCode::Created
         
-    }
-
-    if request_line[1] == "/" {
+    } else if request_line[1] == "/" {
         StatusCode::Success
     } else if request_line[1].starts_with("/echo") {
         
