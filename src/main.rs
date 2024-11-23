@@ -34,7 +34,7 @@ fn main() {
 }
 
 fn handle_connection (stream: &mut TcpStream) -> StatusCode {
-    let buffer = BufReader::new(stream);
+    let buffer = BufReader::new(&mut *stream);
     let http_request: Vec<String> = buffer.lines().map(|line| line.unwrap()).collect();
     let request_line: Vec<String> = http_request[0].split(" ").map(|item| item.to_string()).collect();
 
@@ -50,6 +50,7 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
         let mut f = File::create_new(&file_path).unwrap();
         f.write(content.as_bytes()).unwrap();
         println!("{:?}", content);
+        stream.write("HTTP/1.1 201 Created\r\n\r\n".as_bytes()).unwrap();
         StatusCode::Created
         
     } else if request_line[1] == "/" {
