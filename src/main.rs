@@ -43,11 +43,11 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
         let files = content[content.len() - 1].clone();
         let env_args: Vec<String> = env::args().collect();
         let mut dir = env_args[2].clone();
+        println!("before file name append {:?}", Path::new(&dir).exists());
         dir.push_str(&files);
         let body_content = http_request[http_request.len() - 1].clone();
         println!("{:?},  {:?}", dir, body_content);
-        println!("{:?}", Path::new(&dir).exists());
-        println!("{:?}", Path::new(&dir).parent().unwrap());
+        println!("after file name append {:?}", Path::new(&dir).exists());
         if !Path::new(&dir).exists() {
             fs::create_dir_all(Path::new(&dir).parent().unwrap());
             let file = fs::File::create(&dir);
