@@ -37,7 +37,6 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
     let buffer = BufReader::new(stream);
     let http_request: Vec<String> = buffer.lines().map(|line| line.unwrap()).collect();
     let request_line: Vec<String> = http_request[0].split(" ").map(|item| item.to_string()).collect();
-    println!("{:?}", request_line);
 
     if request_line[0].starts_with("POST") {
         let content:Vec<String> = request_line[1].split("/").map(|item| item.to_string()).collect();
@@ -50,6 +49,7 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
         let content = http_request[http_request.len() - 1].clone();
         let mut f = File::create_new(&file_path);
         f.expect("reason").write(content.as_bytes());
+        println!("{:?}", Path::exists(&file_path));
         StatusCode::Created
         
     } else if request_line[1] == "/" {
