@@ -48,7 +48,7 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
         std::fs::create_dir_all(prefix).unwrap();
         let content = http_request[http_request.len() - 1].clone();
         let mut f = File::create_new(&file_path).unwrap();
-        let output = f.write(content.as_bytes());
+        f.write(content.as_bytes()).unwrap();
         println!("{:?}", content);
         StatusCode::Created
         
