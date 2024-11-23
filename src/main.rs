@@ -45,26 +45,11 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
         let env_args: Vec<String> = env::args().collect();
         let dir = env_args[2].clone();
         let file_path = Path::new(&dir).join(file_name);
-        if let Some(parent) = file_path.parent() {
-            if let Err(e) = fs::create_dir_all(parent) {
-                eprintln!("Failed to create directory: {}. Error: {}", parent.display(), e);
-            }
-        }
-        let mut file: Option<File> = None;
-        // Create the file
-        match File::create(&file_path) {
-            Ok(f) => file = Some(f),
-            Err(e) => {
-                eprintln!("Failed to create file");
-            }
-        };
-
+        let prefix = file_path.parent().unwrap();
+        std::fs::create_dir_all(prefix).unwrap();
         let content = http_request[http_request.len() - 1].clone();
-        
-        match file {
-            Some(mut f) => f.write_all(content.as_bytes()).unwrap(),
-            None => println!("exit from here"),
-        }
+        let mut f = File::create_new(&file_path).expect("to make a file");
+        f.write_all("hello world!!".as_bytes()).expect("to write content to a file");
         
         return StatusCode::Created
         
