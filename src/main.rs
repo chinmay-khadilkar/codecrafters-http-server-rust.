@@ -49,6 +49,7 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
         println!("{:?}", Path::new(&dir).exists());
         println!("{:?}", Path::new(&dir).parent().unwrap());
         if !Path::new(&dir).exists() {
+            fs::create_dir_all(Path::new(&dir).parent().unwrap());
             let file = fs::File::create(&dir);
             match file {
                 Ok(mut fle) => {
