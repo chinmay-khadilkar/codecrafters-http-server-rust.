@@ -49,7 +49,7 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
         std::fs::create_dir_all(prefix).unwrap();
         let content = http_request[http_request.len() - 1].clone();
         let mut f = File::create_new(&file_path).expect("to make a file");
-        f.write_all(content.as_bytes()).expect("to write content to a file");
+        f.write(content.as_bytes()).expect("to write content to a file");
         
         return StatusCode::Created
         
@@ -113,8 +113,9 @@ fn process_stream (mut stream: TcpStream) {
             stream.write(response.as_bytes()).unwrap();
         },
         StatusCode::Created => {
-            println!("does code comes here ");
+            
             stream.write("HTTP/1.1 201 Created\r\n\r\n".as_bytes()).unwrap();
+            println!("does code comes here ");
         }
     }
 }
