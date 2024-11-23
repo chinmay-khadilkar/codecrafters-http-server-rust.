@@ -47,6 +47,7 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
         let body_content = http_request[http_request.len() - 1].clone();
         println!("{:?},  {:?}", dir, body_content);
         println!("{:?}", Path::new(&dir).exists());
+        println!("{:?}", Path::new(&dir).parent().unwrap());
         if !Path::new(&dir).exists() {
             let file = fs::File::create(&dir);
             match file {
