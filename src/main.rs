@@ -49,7 +49,7 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
         let content = http_request[http_request.len() - 1].clone();
         let mut f = File::create_new(&file_path).unwrap();
         let output = f.write(content.as_bytes());
-        println!("{:?}", output);
+        println!("{:?}", content);
         StatusCode::Created
         
     } else if request_line[1] == "/" {
