@@ -43,8 +43,7 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
     // let http_request: Vec<String> = buffer.lines().map(|line| line.unwrap()).collect();
     let request_line: Vec<String> = req_vec[0].split(" ").map(|item| item.to_string()).collect();
     // let empty_pos = req_vec.iter().position(|item| item == String::from(""));
-    let content_body = req_vec[req_vec.len() - 1];
-    println!("{:?}", http_request);
+    let content_body = req_vec[req_vec.len() - 1].clone();
 
     if request_line[0].starts_with("POST") {
         let content:Vec<String> = request_line[1].split("/").map(|item| item.to_string()).collect();
@@ -70,7 +69,7 @@ fn handle_connection (stream: &mut TcpStream) -> StatusCode {
             content: response_body as String
         }
     } else if request_line[1].starts_with("/user-agent") {
-        let content:Vec<String> = http_request[http_request.len() - 1].split(" ").map(|item| item.to_string()).collect();
+        let content:Vec<String> = req_vec[req_vec.len() - 1].split(" ").map(|item| item.to_string()).collect();
         let response_body = content[content.len() - 1].clone();
         StatusCode::SuccessBody {
             content_len: response_body.len() as u8,
