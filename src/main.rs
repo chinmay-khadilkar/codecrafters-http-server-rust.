@@ -34,9 +34,11 @@ fn main() {
 }
 
 fn handle_connection (stream: &mut TcpStream) -> StatusCode {
-    let mut buffer = BufReader::new(stream);
-    let mut entire_request = String::new();
-    buffer.read_to_string(&mut entire_request);
+    // let mut buffer = BufReader::new(stream);
+    let mut data: Vec<u8> = Vec::new();
+    stream.read_to_end(&mut data);
+    let mut entire_request = String::from_utf8(data).unwrap();
+    // buffer.read_to_string(&mut entire_request);
     
     let req_vec:Vec<String> = entire_request.split("\r\n").map(|item| item.to_string()).collect();
     println!("{:?}", req_vec);
